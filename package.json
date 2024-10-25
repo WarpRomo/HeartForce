@@ -1,0 +1,25 @@
+{
+  "name": "classy-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "devStart": "nodemon index.js --ignore *.json"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@coffeeandfun/google-profanity-words": "^2.1.0",
+    "aedos": "^1.1.4",
+    "bad-words": "^3.0.4",
+    "cors": "^2.8.5",
+    "ejs": "^3.1.9",
+    "express": "^4.18.2",
+    "socket.io": "^4.8.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "type": "module"
+}

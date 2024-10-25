@@ -1,0 +1,503 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>HeartForce⚡</title>
+
+  <script src="socket.io.js"></script>
+
+  <link rel="icon" href="favicon.ico">
+
+  <script type="module" src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script type="module" src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-annotation/3.1.0/chartjs-plugin-annotation.min.js"></script>
+
+  <script src="path/to/chartjs/dist/chart.min.js"></script>
+  <script src="path/to/chartjs-plugin-annotation/dist/chartjs-plugin-annotation.min.js"></script>
+
+  <script src="script.js"></script>
+
+
+
+</head>
+
+
+
+  <body onload="init()">
+
+    <div id ="imgcontainer">
+    <img src="space.jpg" id="backgroundimage"></img>
+  </div>
+
+    <style>
+      #imgcontainer{
+        position: absolute;
+        left: -100px;
+        top: -100px;
+      }
+      #backgroundimage{
+        min-width: 105vw;
+        min-height: 105vh;
+        opacity: 0.4;
+        position: absolute;
+        transform: translate(0,0);
+        user-select: none;
+        z-index: -1;
+      }
+
+    </style>
+
+    <p id="title">HeartForce⚡</p>
+    <p id="description">Welcome to the <b>HeartForce</b> dashboard! Here you can see the current heartrates of all pilots currently
+      wearing a <b>HeartForce wrist-band</b>. You will be alerted if anyone is suffering heart issues or is it lethal risk.
+        You may also click one of the data options to get a more detailed report of someone's heart history, and heart related issues.
+    </p>
+
+    <div class="slidercontainer">
+      <p>Cardiac Arrest Threshold (BPM)</p>
+      <input type="range" min="0" max="200" value="5" class="slider" id="rateThreshold" oninput="rateThreshold(this)">
+      <p style="margin-top: 0px; font-size: 12px;">Control what BPM counts as heart collapse.</p>
+    </div>
+
+    <div class="slidercontainer">
+      <p>Heart Skip Sensitivity</p>
+      <input type="range" min="0" max="100" value="10" class="slider" id="skipSensitivity">
+      <p style="margin-top: 0px; font-size: 12px;">Control sensitivity of heart skips for score metric.</p>
+    </div>
+
+    <div class="slidercontainer">
+      <p>Blood Oxygen Threshold (SPO2)</p>
+      <input type="range" min="0" max="100" value="10" class="slider" id="O2Sensitivity">
+      <p style="margin-top: 0px; font-size: 12px;">Control the threshold for low Blood O2 levels.</p>
+    </div>
+
+    <style>
+
+      .slidercontainer > p{
+        font-family: Arial;
+        color: rgba(255,255,255,0.8);
+        font-size: 15px;
+        margin-bottom: 0px;
+
+      }
+
+
+
+      .slidercontainer > input{
+        margin-top: 0px;
+      }
+      .slidercontainer{
+        margin-left: 20px;
+        opacity: 0.6;
+        transition: opacity 0.5s;
+        display: inline-block
+      }
+      .slidercontainer:hover{
+        opacity: 1;
+      }
+
+      input[type='range']{
+        cursor: ew-resize;
+      }
+
+      input[type='range'] {
+        overflow: hidden;
+        width: 200px;
+        -webkit-appearance: none;
+        background-color: gray;
+      }
+
+      input[type='range']::-webkit-slider-runnable-track {
+        height: 10px;
+        -webkit-appearance: none;
+        color: #13bba4;
+        margin-top: -1px;
+      }
+
+      input[type='range']::-webkit-slider-thumb {
+        width: 10px;
+        -webkit-appearance: none;
+        height: 10px;
+        background: white;
+        box-shadow: -300px 0 0 300px red;
+      }
+
+      #rateThreshold::-webkit-slider-thumb{
+        box-shadow: -300px 0 0 300px purple;
+      }
+
+      #O2Sensitivity::-webkit-slider-thumb{
+        box-shadow: -300px 0 0 300px blue;
+      }
+
+    </style>
+
+    <div id="heartCharts"></div>
+
+    <div class="heartChart" id="exampleheartChart" style="opacity: 0">
+
+      <div class="chartStatus">
+
+        <p class="chartActive">Active</p>
+        <p class="chartInActive" style="display: none">Not Active</p>
+        <p class="patientName" style="color: rgba(255,255,255,0.75)">Ritik Jalisatgi</p>
+
+      </div>
+
+      <canvas id="myChart"></canvas>
+      <div class="heartInformation">
+        <div class="patientSection">
+          <p class="desctitle">Patient Data</p>
+          <div class = "chartDescription">
+
+            <p class="name">Ritik Jalisatgi</p>
+            <p class="age">0</p>
+            <p class="healthrating">Good</p>
+
+          </div>
+        </div>
+
+        <div class="informationSection">
+          <p class="desctitle">Personal Description</p>
+          <p class="personalDesc">-Student at De Anza College. <br>-Exercises frequently <br>-Low risk of heart issues</p>
+        </div>
+
+        <div class="dataSection">
+          <p class="desctitle">Data Options</p>
+          <div class="heartButtons">
+            <button id="analysis" onclick="heartanalysis(this)">Analyze Heart</button>
+            <button onclick="heartdata(this)">Heart Report</button>
+            <button id="pausebutton" onclick="pausebutton(this)">Pause</button>
+            <button class="aiAnalysis" onclick="aiAnalysis(this)">AI Analysis</button>
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="aiAnalysisBox" style="display:none">
+        <button class="aiClose" onclick="closeAI(this)">Close</button>
+        <div class="aiMessages">
+
+          <p class="spacer" style="height:15px"></p>
+
+          <p class="aiMessage">Welcome to <b>HeartAI</b>! You may ask me any questions you have regarding the patient's heart health.</p>
+
+          <p class="spacerlast" style="height:5px"></p>
+
+        </div>
+
+        <input class="aiInput" placeholder="Ask questions about patient here..." onkeydown="aisubmit(event)"></div>
+
+      </div>
+
+    </div>
+
+  </body>
+
+  <style>
+
+  .userMessage{
+    width: 85%;
+    background: rgb(50,50,50);
+    padding: 15px;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+    border-top-right-radius: 10px;
+    position: relative;
+    left: 8%;
+    transition: opacity 0.5s;
+  }
+  .aiMessage{
+    width: 85%;
+    background: darkred;
+    padding: 15px;
+    border-top-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    border-top-right-radius: 10px;
+    position: relative;
+    left: 3%;
+    transition: opacity 0.3s;
+  }
+
+  .aiClose{
+    font-family: Arial;
+    text-align: center;
+    padding: 10px;
+    background-color: rgba(80,0,0,0.6);
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    border-radius: 8px;
+    z-index: 1;
+    backdrop-filter: blur(5px);
+  }
+  .aiClose:hover{
+    background-color: rgba(80,0,0,0.8);
+  }
+  .aiClose:active{
+    background-color: rgba(80,0,0,1);
+  }
+
+  :root{
+    color-scheme: dark;
+  }
+
+  input { outline: none; box-shadow: none !important}
+
+  .aiMessages{
+    overflow-y: scroll;
+    height: 350px;
+  }
+
+  .aiInput{
+    -webkit-appearance: none;
+    box-shadow: none;
+    outline: none;
+    bottom: 0px;
+    width: 96%;
+    border: none;
+    border-top: solid 3px rgb(25,25,25);
+    font-family: Arial;
+    font-size: 15px;
+    position: absolute;
+    padding: 15px;
+    bottom: 0px;
+    box-shadow: 0px 0px 20px black !important;
+    scrollbar-width: none;
+    color: rgb(255,255,255);
+  }
+  .aiInput::-webkit-scrollbar {
+    display: none;
+  }
+  .aiInput:hover{
+    color: rgb(255,255,255);
+  }
+  .aiInput:focus{
+    border-top: solid 3px rgb(25,25,25);
+    box-shadow: 0px 0px 20px white;
+    color: rgb(255,255,255);
+  }
+
+  ::-webkit-scrollbar {
+  width: 9px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: rgba(155, 155, 155, 0.5);
+    border-radius: 20px;
+    border: transparent;
+  }
+
+  .aiAnalysisBox{
+    width: 100%;
+    height: 400px;
+    box-shadow: 0px 0px 20px black;
+    border-radius: 10px;
+    border: solid 2px rgb(25,25,25);
+    background: rgb(19,19,19);
+    position: absolute;
+    bottom: 0px;
+    overflow: hidden;
+  }
+  .aiAnalysis{
+    background: purple !important;
+  }
+
+  #exampleheartChart{
+    display: none;
+  }
+
+
+  #title{
+    color: white;
+    opacity: 0.7;
+    font-size: 30px;
+    font-family: Helvetica;
+    border-bottom: solid 2px white;
+    width: 900px;
+    margin-left: 20px;
+    margin-bottom: 0px;
+  }
+
+  #analysis{
+    background: darkgreen;
+  }
+  #heartdata{
+    background: purple;
+  }
+
+  #pausebutton{
+    background: darkblue;
+  }
+
+  #description{
+    color: white;
+    opacity: 0.7;
+    font-size: 15px;
+    font-family: Helvetica;
+    width: 900px;
+    margin-left: 20px;
+  }
+
+  .heartChart{
+    position: relative;
+    margin: 20px;
+    transition: all 0.5s;
+  }
+
+  .chartStatus{
+    position: relative;
+    text-align: center;
+    font-weight: bold;
+    color: white;
+    margin-top: 0px;
+    font-family: Helvetica;
+  }
+
+  .chartStatus > p{
+    margin-top: 5px;
+  }
+
+
+  .chartActive::before{
+     content: '';
+     display: inline-block;
+     width: 10px;
+     height: 10px;
+     -moz-border-radius: 7.5px;
+     -webkit-border-radius: 7.5px;
+     border-radius: 7.5px;
+     background-color: red;
+     position: relative;
+     right: 3px;
+     bottom: 1px;
+  }
+
+  .chartInActive::before{
+     content: '';
+     display: inline-block;
+     width: 10px;
+     height: 10px;
+     -moz-border-radius: 7.5px;
+     -webkit-border-radius: 7.5px;
+     border-radius: 7.5px;
+     background-color: gray;
+     position: relative;
+     right: 3px;
+     bottom: 1px;
+  }
+
+
+  p{
+    font-family: Helvetica;
+  }
+
+  .heartButtons{
+    display: flex;
+    flex-direction: column;
+  }
+
+  button, input[type="submit"], input[type="reset"] {
+  	background: none;
+  	color: inherit;
+  	border: none;
+  	padding: 0;
+  	font: inherit;
+  	cursor: pointer;
+  	outline: inherit;
+  }
+
+  .heartButtons{
+    margin-top: -13px;
+  }
+
+  .heartButtons > button{
+    padding-top: 5px;
+    padding-bottom: 5px;
+    margin-bottom: 5px;
+    width: 100%;
+    background: rgb(255,0,0,0.5);
+    font-family: Helvetica;
+    border-radius: 5px;
+    color: rgb(255,255,255,0.7);
+    opacity: 0.8;
+  }
+
+  .heartButtons > button:hover{
+    opacity: 1;
+  }
+
+  .desctitle{
+    color: white;
+    opacity: 0.5;
+  }
+
+  .chartDescription{
+    max-width: 500px;
+  }
+  .chartDescription > p{
+    color: white;
+    opacity: 0.7;
+    margin-top: 0px;
+    margin-bottom: 0px;
+  }
+
+  .personalDesc{
+    color: white;
+    opacity: 0.7;
+  }
+
+  .heartInformation{
+    display: flex;
+    justify-content: space-around;
+  }
+  .patientSection{
+    width: 25%;
+  }
+  .informationSection{
+    width: 41%;
+  }
+  .dataSection{
+    width: 25%;
+  }
+
+  .heartChart{
+    box-shadow: 0px 0px 10px rgba(0,0,0,0.5);
+    max-width: 500px;
+    padding: 20px;
+    border: solid 1px rgba(255,255,255,0.1);
+    border-radius: 20px;
+    flex-grow: 1;
+    backdrop-filter: blur(20px);
+  }
+
+  .heartChart > canvas{
+    max-width: 100%;
+    min-width: 100%;
+    max-height: 300px;
+    min-height: 300px;
+  }
+
+  #heartCharts{
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+
+  body{
+    background: rgb(0,0,0);
+    overflow-x: hidden;
+  }
+
+  </style>
+
+</html>
