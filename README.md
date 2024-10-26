@@ -15,28 +15,6 @@ HeartForce⚡ provides real-time monitoring of heart rate and oxygen saturation 
 
 ---
 
-### Code Structure
-
-- **index.html**: Contains the layout and HTML structure of the HeartForce dashboard.
-- **script.js**: JavaScript file for handling data visualization, threshold adjustments, and AI interaction.
-- **server.js**: Express server setup with Socket.io integration for real-time data transfer between backend and frontend.
-- **styles.css**: Styling for UI elements and overall design consistency.
-
----
-
-### Usage
-
-1. **Adjust Health Thresholds**  
-   - Use sliders on the main dashboard to set personalized heart and oxygen risk thresholds.
-   
-2. **View Patient History**  
-   - Select a patient to view detailed metrics on heart rate, oxygen levels, and fatigue scores.
-
-3. **AI Health Assistant**  
-   - Ask the HeartAI assistant specific questions about a patient’s heart health for real-time insights.
-
----
-
 ### Installation
 
 1. **Clone the Repository**  
