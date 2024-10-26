@@ -1,7 +1,7 @@
 
 
 # HeartForce⚡
-HeartForce⚡ provides real-time monitoring of heart rate and oxygen saturation levels for individuals wearing the HeartForce wristband. This dashboard offers instant alerts for potential heart health risks, detailed heart history analysis, and adjustable thresholds to cater to each user’s needs.
+HeartForce⚡ provides real-time monitoring of heart rate, G-force, and oxygen saturation levels for individuals wearing the HeartForce wristband. This dashboard offers instant alerts for potential heart health risks, detailed heart history analysis, and adjustable thresholds to cater to each user’s needs.
 
 ---
 
