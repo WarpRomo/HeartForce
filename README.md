@@ -34,7 +34,7 @@ HeartForce⚡ provides real-time monitoring of heart rate, G-force, and oxygen s
    ```
 
 4. **Access the Dashboard**  
-   - Open your browser to http://20.1.1.65:8080/ to access the HeartForce dashboard.
+   - Open your browser to http://<ipv4>:8080/ to access the HeartForce dashboard.
 
 ---
 
