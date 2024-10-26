@@ -46,9 +46,9 @@ let heartRates = {
 		lastActive: 0,
 	  patient: {
 	    name: "Ritik Jalisatgi",
-	    age: 18,
-	    health: "Good",
-	    personal: "-Student at De Anza College.<br>-Exercises frequently<br>-Low risk of heart issues"
+	    age: "<b>18</b> years old",
+	    health: "Semi-Healthy",
+	    personal: "-Weight: <b>72.4kg</b><br>-Exercises frequently<br>-Training time: <b>12 hours</b>"
 	  },
 	},
 	"Jayven Huang": {
@@ -58,9 +58,9 @@ let heartRates = {
 		lastActive: 0,
 	  patient: {
 	    name: "Jayven Huang",
-	    age: 18,
-	    health: "Great",
-	    personal: "-Student at De Anza College.<br>-Low risk of heart issues<br>-Plays sports and exercises"
+	    age: "<b>18</b> years old",
+	    health: "Healthy",
+	    personal: "-Weight: <b>67.9kg</b><br>-Exercises semi-frequently<br>-Training time: <b>8.5 hours</b>"
 	  },
 	}
 
@@ -94,7 +94,7 @@ async function eventsHandler(request, response, next) {
 		heartRates[body.id].heart.push(time);
 
 		let val = Math.abs(body.force/1000) * 2.01;
-		if(val > 50) val = 50;
+		if(val > 80) val = 80;
 
 		heartRates[body.id].force.push(Math.abs(body.force/1000) * 2.01);
 

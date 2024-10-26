@@ -1,5 +1,5 @@
 
-let alarm = new Audio("alarm.wav")
+let alarm = new Audio("alarmloud.wav")
 
 const socket = io();
 
@@ -15,7 +15,7 @@ let heartRates = {};
 
 let c = 0;
 
-let parallaxAm = 0.02;
+let parallaxAm = 0.04;
 let parallaxSp = 0.01;
 let relativeX = 0;
 let relativeY = 0;
@@ -34,7 +34,6 @@ window.addEventListener('mousemove', (event) => {
 });
 
 setInterval(() => {
-  console.log('pos X:', posX, 'pos Y:', posY);
   let img = document.getElementById("backgroundimage");
 
   posX = posX + (relativeX - posX) * parallaxSp;
@@ -72,15 +71,24 @@ function pausebutton(event){
 
   let key = event.parentElement.parentElement.parentElement.parentElement.id;
 
-  let paused = event.innerHTML != "Pause";
+  let paused = event.innerHTML != "Space Calibrate";
+
+  let spaceCanvas = event.parentElement.parentElement.parentElement.parentElement.querySelectorAll("canvas")[1];
+  console.log(spaceCanvas);
+
   if(!paused){
     pausedList.add(key);
-    event.innerHTML = "Unpause"
+    event.innerHTML = "Uncalibrate"
+    spaceCanvas.style.display = "";
+    spaceCanvas.style.position = "relative";
   }
   else{
     pausedList.delete(key);
-    event.innerHTML = "Pause"
+    event.innerHTML = "Space Calibrate"
+    spaceCanvas.style.display = "none";
+    spaceCanvas.style.position = "absolute";
   }
+
 
 }
 
@@ -170,15 +178,20 @@ function heartanalysis(event){
 
     button.innerHTML = format +", " + grade;
 
+    if(grade == undefined){
+      button.innerHTML = "Not enough data..."
+    }
+
+
     button.style.opacity = 1;
 
     setTimeout(() => {
       button.disabled = false;
       button.innerHTML = "Analyze Heart";
-    }, 17000)
+    }, 5000)
 
 
-  }, 3000)
+  }, 1500)
 
 }
 
@@ -234,7 +247,6 @@ function createChart(key){
 
   let heartCanvas = document.createElement("canvas");
   heartCanvas.id = key + "chart";
-
   let heartCtx = heartCanvas.getContext("2d");
   heartCharts.appendChild(heartCanvas)
 
@@ -288,6 +300,49 @@ function createChart(key){
     plugins: [horizontalLinePlugin]
   });
 
+  let spaceCanvas = document.createElement("canvas");
+  spaceCanvas.id = key + "chartSpace";
+  let spaceCtx = spaceCanvas.getContext("2d");
+  heartCharts.appendChild(spaceCanvas)
+  let spaceChartLIB = new Chart(spaceCtx, {
+    type: 'line',
+    data: {
+      labels: [],
+      datasets: [{
+        label: 'Space Callibrated Oxygen for ' + data[key].patient.name + " (SPO2)",
+        backgroundColor: "rgb(0,0,100)",
+        borderColor: "rgb(0,0,100)",
+        data: [],
+        borderWidth: 1
+      }]
+    },
+    options: {
+      maintainAspectRatio: false,
+      responsive: true,
+      scales: {
+        y: {
+          beginAtZero: true,
+          suggestedMin: 0,
+          suggestedMax: 200
+        },
+        x:{
+          type: 'time',
+          time: {
+            unit: 'second'
+          },
+          ticks:{
+            maxTicksLimit: 5
+          }
+        }
+      }
+    }//,
+    //plugins: [horizontalLinePlugin]
+  });
+  spaceCanvas.style.display = "none";
+  spaceCanvas.style.position = "absolute";
+  newChart.insertBefore(spaceCanvas, newChart.children[3]);
+  //newChart.removeChild(newChart.children[2])
+
   console.log("INITIALIZED", chartLIB)
 
   document.getElementById("heartCharts").appendChild(newChart);
@@ -299,7 +354,7 @@ function createChart(key){
 
   setTimeout(()=>{newChart.style.opacity = 1});
 
-  return {chartLIB: chartLIB, element: newChart}
+  return {chartLIB: chartLIB, element: newChart, spaceChartLIB: spaceChartLIB}
 
 
 }
@@ -318,7 +373,7 @@ function aisubmit(e){
   if(e.key == "Enter"){
 
     let content = e.target.value;
-    console.log(content);
+    //console.log(content);
 
     let newMessage = document.createElement("p");
     newMessage.classList.add("userMessage");
@@ -329,12 +384,30 @@ function aisubmit(e){
     let oxygen = charts[key].chartLIB.data.datasets[1].data
 
     let maxheart = 0;
-    let minheart = 0;
+    let minheart = Math.Infinity;
     let meanheart = 0;
 
+    let avgSize = 4;
+
     if(heart.length > 0){
-      maxheart = Math.max(...heart);
-      minheart = Math.min(...heart);
+
+      for(var i = 0; i < heart.length - avgSize; i++){
+
+        let avg = 0;
+
+        for(var j = 0; j < avgSize; j++){
+          avg += heart[j + i];
+        }
+
+        console.log("HERE");
+
+        avg /= 4;
+
+        if(avg > maxheart) maxheart = avg;
+        if(avg < minheart) minheart = avg;
+
+      }
+
       meanheart = heart.reduce( (a,b) => a + b) / heart.length;
     }
     if(maxheart == 0){
@@ -343,7 +416,7 @@ function aisubmit(e){
       meanheart = "Unknown"
     }
 
-    console.log(maxheart, minheart, meanheart)
+    console.log(heart, maxheart, minheart, meanheart)
 
     newMessage.innerHTML = content;
     newMessage.style.opacity = 0;
@@ -361,6 +434,7 @@ function aisubmit(e){
       content:
 `You are an AI assistant that gives health information based on the pilot's heartrate. You are speaking to the viewer of the dashboard.
 For example, dietary plans to improve heart rate, whether a heart rate is too low or too high, and other things a medical doctor would say. Make sure to include sources.
+Keep your answers around 3 sentences long, and concise.
 Your message is directly set as the innerHTML of an element. Use HTML code to make everything look great.
 Also, be sure to bold important information.
 
@@ -381,8 +455,6 @@ Highest BPM over past hour: ${maxheart} BPM`}
       }
     }
 
-    console.log(conversation);
-
     setTimeout(() => {
       let aiMessage = document.createElement("p");
       aiMessage.classList.add("aiMessage");
@@ -396,7 +468,6 @@ Highest BPM over past hour: ${maxheart} BPM`}
 
       streamChatGPTMessage(conversation, aiMessage).then(() => {
 
-        console.log("THEY FINISHED");
         e.target.disabled = false;
         e.target.opacity = 1;
 
@@ -455,11 +526,11 @@ async function streamChatGPTMessage(conversation, element) {
           if (done) break;
 
           let res = decoder.decode(value);
-          console.log("Response", res);
+          //console.log("Response", res);
           res = res.split("[DONE]")[0]
-          console.log("Remove [DONE]", res);
+          //console.log("Remove [DONE]", res);
           res = res.split("\n\n");
-          console.log("Broken Up", res);
+          //console.log("Broken Up", res);
 
           if(buffer.length == 0) buffer.push("");
           buffer[0] += res[0];
@@ -467,7 +538,7 @@ async function streamChatGPTMessage(conversation, element) {
             buffer.push(res[i]);
           }
 
-          console.log("Buffer", buffer);
+          //console.log("Buffer", buffer);
 
           while(buffer.length > 0){
 
@@ -484,15 +555,15 @@ async function streamChatGPTMessage(conversation, element) {
               buffer.shift();
             }
             catch{
-              console.log("Error")
-              console.log(text);
+              //console.log("Error")
+              //console.log(text);
               break;
             }
 
           }
 
           element.innerHTML = final;
-          console.log(final);
+          //console.log(final);
 
           await new Promise(resolve => setTimeout(resolve, 100));
       }
@@ -524,13 +595,41 @@ function activateChart(chart){
 }
 
 function deActivateChart(chart){
-
   charts[chart].element.children[0].children[0].style.display = "none";
   charts[chart].element.children[0].children[1].style.display = "";
   //charts[chart].element.style.opacity = 0.6;
+}
 
+function fatigueScore(data){
+
+  if(data.length < 5) return "Not enough data...";
+
+  let hr = 0;
+
+  //console.log(data);
+
+  for(var i = 0; i < data.length; i++){
+    hr += data[i];
+  }
+  hr /= data.length;
+
+  //console.log(hr);
+
+  let fatigue = 15;
+
+  let dist = Math.floor(Math.abs(hr - fatigue));
+
+  let fatigueInv = 100 - dist;
+  if(fatigueInv < 0) fatigueInv = 0;
+
+  let fatigueText = "";
+  if(fatigueInv < 80) fatigueText = "Low Fatigue"
+  else fatigueText = "Fatigued, attention required"
+
+  return "<b>" + fatigueInv + "%</b> " + fatigueText;
 
 }
+
 /*
 setInterval(() => {
   data = getData()
@@ -558,12 +657,23 @@ setInterval(() => {
 
       let chart = charts[keys[l]];
       let chartLIB = chart.chartLIB;
+      let spaceChartLIB = chart.spaceChartLIB;
 
       let labels = chartLIB.data.labels;
+      spaceChartLIB.data.labels = labels;
 
       let heart = data[keys[l]].heart
       let oxygen = data[keys[l]].oxygen
       let force = data[keys[l]].force
+
+    //  console.log(heart, "input");
+
+      let fatigue = fatigueScore(chartLIB.data.datasets[0].data);
+      //console.log(fatigue + " " + keys[l])
+
+      let fatigueElem = charts[keys[l]].element.querySelector("#fatigue").children[1];
+      fatigueElem.innerHTML = fatigue;
+      //console.log("elem", fatigueElem, fatigue);
 
 
       if(labels.length > 0){
@@ -573,7 +683,9 @@ setInterval(() => {
           chartLIB.data.datasets[0].data.shift();
           chartLIB.data.datasets[1].data.shift();
           chartLIB.data.datasets[2].data.shift();
+          spaceChartLIB.data.datasets[0].data.shift();
           chartLIB.update();
+          spaceChartLIB.update();
         }
       }
 
@@ -613,6 +725,7 @@ setInterval(() => {
           chartLIB.data.datasets[0].data.push(60000 * beats/time);
           chartLIB.data.datasets[1].data.push(oxygen[i]);
           chartLIB.data.datasets[2].data.push(force[i]);
+          spaceChartLIB.data.datasets[0].data.push(oxygen[i] * 0.95);
 
           //chart.data.labels.push(chart.data.labels.length);
           //chart.data.datasets[0].data.push(chart.data.labels.length);
@@ -621,9 +734,11 @@ setInterval(() => {
         }
 
         chartLIB.update();
+        spaceChartLIB.update();
 
         while(labels.length > 25){
           labels.shift();
+          spaceChartLIB.data.datasets[0].data.shift();
           chartLIB.data.datasets[0].data.shift();
           chartLIB.data.datasets[1].data.shift();
           chartLIB.data.datasets[2].data.shift();
@@ -655,7 +770,9 @@ setInterval(() => {
             chartLIB.data.datasets[0].data.push(0);
             chartLIB.data.datasets[1].data.push(oxygen[oxygen.length-1]);
             chartLIB.data.datasets[2].data.push(force[force.length-1]);
+            spaceChartLIB.data.datasets[0].data.push(oxygen[oxygen.length-1]);
             chartLIB.update();
+            spaceChartLIB.update();
           }
 
 

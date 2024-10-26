@@ -29,7 +29,7 @@
 
 
 
-  <body onload="init()">
+  <body>
 
     <div id ="imgcontainer">
     <img src="space.jpg" id="backgroundimage"></img>
@@ -63,12 +63,6 @@
       <p>Cardiac Arrest Threshold (BPM)</p>
       <input type="range" min="0" max="200" value="5" class="slider" id="rateThreshold" oninput="rateThreshold(this)">
       <p style="margin-top: 0px; font-size: 12px;">Control what BPM counts as heart collapse.</p>
-    </div>
-
-    <div class="slidercontainer">
-      <p>Heart Skip Sensitivity</p>
-      <input type="range" min="0" max="100" value="10" class="slider" id="skipSensitivity">
-      <p style="margin-top: 0px; font-size: 12px;">Control sensitivity of heart skips for score metric.</p>
     </div>
 
     <div class="slidercontainer">
@@ -161,6 +155,10 @@
             <p class="healthrating">Good</p>
 
           </div>
+          <div id="fatigue">
+            <p class="desctitle">Fatigue Score</p>
+            <p style="margin-top: 0px">Not enough data...</p>
+          </div>
         </div>
 
         <div class="informationSection">
@@ -173,7 +171,7 @@
           <div class="heartButtons">
             <button id="analysis" onclick="heartanalysis(this)">Analyze Heart</button>
             <button onclick="heartdata(this)">Heart Report</button>
-            <button id="pausebutton" onclick="pausebutton(this)">Pause</button>
+            <button id="pausebutton" onclick="pausebutton(this)">Space Calibrate</button>
             <button class="aiAnalysis" onclick="aiAnalysis(this)">AI Analysis</button>
           </div>
 
@@ -181,6 +179,23 @@
 
       </div>
 
+      <div class="sponsors">
+
+        <img src="wolframlogo.png"></img>
+        <img src="openailogo.png"></img>
+
+      </div>
+
+      <style>
+
+        .sponsors > img{
+
+          height: 30px;
+
+        }
+
+      </style>
+      
       <div class="aiAnalysisBox" style="display:none">
         <button class="aiClose" onclick="closeAI(this)">Close</button>
         <div class="aiMessages">
@@ -193,9 +208,14 @@
 
         </div>
 
-        <input class="aiInput" placeholder="Ask questions about patient here..." onkeydown="aisubmit(event)"></div>
+        <input class="aiInput" placeholder="Ask questions about patient here..." onkeydown="aisubmit(event)">
+      </div>
+
 
       </div>
+
+
+
 
     </div>
 
@@ -417,7 +437,7 @@
   }
 
   .heartButtons{
-    margin-top: -13px;
+    margin-top: 0px;
   }
 
   .heartButtons > button{
@@ -439,6 +459,7 @@
   .desctitle{
     color: white;
     opacity: 0.5;
+    margin-bottom: 2px;
   }
 
   .chartDescription{
@@ -454,11 +475,13 @@
   .personalDesc{
     color: white;
     opacity: 0.7;
+    margin-top: 0px;
   }
 
   .heartInformation{
     display: flex;
     justify-content: space-around;
+    margin-bottom: 10px;
   }
   .patientSection{
     width: 25%;
@@ -480,16 +503,24 @@
     backdrop-filter: blur(20px);
   }
 
-  .heartChart > canvas{
+  .heartChart > canvas:nth-of-type(1){
     max-width: 100%;
     min-width: 100%;
     max-height: 300px;
     min-height: 300px;
   }
 
+  .heartChart > canvas:nth-of-type(2){
+    max-width: 100%;
+    min-width: 100%;
+    max-height: 150px;
+    min-height: 150px;
+  }
+
   #heartCharts{
     display: flex;
     flex-wrap: wrap;
+    align-items: start;
   }
 
 
