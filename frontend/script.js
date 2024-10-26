@@ -450,7 +450,7 @@ Highest BPM over past hour: ${maxheart} BPM`}
       if(children[i].classList.contains("aiMessage")){
         conversation.push({role: "assistant", content: children[i].innerHTML})
       }
-      else{
+      if(children[i].classList.contains("userMessage")){
         conversation.push({role: "user", content: children[i].innerHTML})
       }
     }
@@ -488,13 +488,13 @@ async function streamChatGPTMessage(conversation, element) {
     const apiUrl = 'https://api.openai.com/v1/chat/completions'; // OpenAI Chat API
     const apiKey = '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'; // Replace with actual API key
 
-    const requestBody = {
+    let requestBody = {
         model: 'gpt-4',
         messages: conversation,
         stream: true // Enable streaming
     };
 
-    const response = await fetch(apiUrl, {
+    let response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -504,9 +504,8 @@ async function streamChatGPTMessage(conversation, element) {
     });
 
     // Create a readable stream to process incoming chunks of data
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder('utf-8');
-    let buffer = '';  // Buffer to hold partial chunks
+    let reader = response.body.getReader();
+    let decoder = new TextDecoder('utf-8');
 
     let first = true;
 
@@ -568,7 +567,93 @@ async function streamChatGPTMessage(conversation, element) {
           await new Promise(resolve => setTimeout(resolve, 100));
       }
 
-      resolve();
+      conversation.push({role: "assistant", content: final})
+      conversation.push({role: "system", content: "State one-word that will be used in a wolfram alpha short summary query, and is related to the conversation above. Example: 'Heartrate', 'Astronaut', 'NASA', 'MayoClinic'"})
+
+      requestBody = {
+          model: 'gpt-4',
+          messages: conversation,
+          stream: true // Enable streaming
+      };
+
+      response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${apiKey}`
+          },
+          body: JSON.stringify(requestBody)
+      });
+
+      reader = response.body.getReader();
+      decoder = new TextDecoder('utf-8');
+
+      final = "";
+      buffer = [];
+
+      while (true) {
+
+          const { value, done } = await reader.read();
+          if (done) break;
+
+          let res = decoder.decode(value);
+          res = res.split("[DONE]")[0]
+          res = res.split("\n\n");
+
+          if(buffer.length == 0) buffer.push("");
+          buffer[0] += res[0];
+          for(var i = 1; i < res.length; i++){
+            buffer.push(res[i]);
+          }
+
+          console.log("Buffer");
+
+          while(buffer.length > 0){
+
+            let text = buffer[0];
+            text = text.substring(6,text.length)
+            if(text.length == 0) break;
+
+
+
+            try{
+              let words = JSON.parse(text);
+              words = words["choices"][0]["delta"]["content"]
+              if(words != undefined) final += words;
+              console.log("Creating", final);
+              buffer.shift();
+            }
+            catch{
+              break;
+            }
+
+          }
+
+          await new Promise(resolve => setTimeout(resolve, 100));
+      }
+
+      console.log("Wolfram Request", final);
+
+      let imgElement = document.createElement("img");
+      imgElement.classList.add("heartaiimg")
+      imgElement.src = "wolframload.png";
+      element.parentNode.insertBefore(imgElement, element.nextSibling);
+
+      console.log("Loading");
+
+      imgElement.onload = function(){
+
+        imgElement.onload = function(){
+          resolve();
+        }
+
+        imgElement.src = "http://api.wolframalpha.com/v1/simple?appid=TT67KA-7XV95VE944&i=" + final //Average%20resting%20heart%20rate%20in%20humans";
+
+      }
+
+
+
+
 
     })
 

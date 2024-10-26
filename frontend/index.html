@@ -54,7 +54,7 @@
     </style>
 
     <p id="title">HeartForce⚡</p>
-    <p id="description">Welcome to the <b>HeartForce</b> dashboard! Here you can see the current heartrates of all pilots currently
+    <p id="description">Welcome to the <b>HeartForce</b> dashboard! Here you can see the current heartrates of all astronauts currently
       wearing a <b>HeartForce wrist-band</b>. You will be alerted if anyone is suffering heart issues or is it lethal risk.
         You may also click one of the data options to get a more detailed report of someone's heart history, and heart related issues.
     </p>
@@ -179,25 +179,34 @@
 
       </div>
 
-      <div class="sponsors">
-
-        <img src="wolframlogo.png"></img>
-        <img src="openailogo.png"></img>
-
-      </div>
-
-      <style>
-
-        .sponsors > img{
-
-          height: 30px;
-
-        }
-
-      </style>
-      
       <div class="aiAnalysisBox" style="display:none">
         <button class="aiClose" onclick="closeAI(this)">Close</button>
+
+        <div class="sponsors">
+
+          <img src="wolframlogo.png"></img>
+          <img src="openailogo.png"></img>
+
+        </div>
+
+        <style>
+
+          .sponsors > img{
+
+            height: 27px;
+            margin-left: 10px;
+
+          }
+          .sponsors{
+            position: absolute;
+            right: 12px;
+            top: 7px;
+            opacity: 0.2;
+            z-index: 1
+          }
+
+        </style>
+
         <div class="aiMessages">
 
           <p class="spacer" style="height:15px"></p>
@@ -222,6 +231,14 @@
   </body>
 
   <style>
+
+  .heartaiimg{
+    width: 350px;
+    height: 350px;
+    object-fit: cover;
+    object-position: 0% 0%;
+    margin-left: 20px;
+  }
 
   .userMessage{
     width: 85%;
