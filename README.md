@@ -38,6 +38,10 @@ HeartForce⚡ provides real-time monitoring of heart rate and oxygen saturation 
 
 ---
 
+### Demo
+![image](https://github.com/user-attachments/assets/077aec42-5164-46c9-a935-6a25c55384ba)
+
+
 ### Future Enhancements
 
 - Integration with medical device APIs for continuous monitoring.
