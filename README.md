@@ -34,7 +34,7 @@ HeartForce⚡ provides real-time monitoring of heart rate and oxygen saturation 
    ```
 
 4. **Access the Dashboard**  
-   - Open your browser to [localhost:8080](http://localhost:8080) to access the HeartForce dashboard.
+   - Open your browser to http://20.1.1.65:8080/ to access the HeartForce dashboard.
 
 ---
 
