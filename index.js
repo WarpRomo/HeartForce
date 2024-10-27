@@ -51,16 +51,16 @@ let heartRates = {
 	    personal: "-Weight: <b>72.4kg</b><br>-Exercises frequently<br>-Training time: <b>12 hours</b>"
 	  },
 	},
-	"Jayven Huang": {
+	"Aryen Palkar": {
 	  heart: [],
 	  oxygen: [],
 		force: [],
 		lastActive: 0,
 	  patient: {
-	    name: "Jayven Huang",
-	    age: "<b>18</b> years old",
-	    health: "Healthy",
-	    personal: "-Weight: <b>67.9kg</b><br>-Exercises semi-frequently<br>-Training time: <b>8.5 hours</b>"
+	    name: "Aryen Palkar",
+	    age: "<b>17</b> years old",
+	    health: "Very Healthy",
+	    personal: "-Weight: <b>80.09g</b><br>-Exercises semi-frequently<br>-Training time: <b>8.5 hours</b>"
 	  },
 	}
 
