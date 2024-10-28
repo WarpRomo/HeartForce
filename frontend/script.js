@@ -486,7 +486,7 @@ Highest BPM over past hour: ${maxheart} BPM`}
 
 async function streamChatGPTMessage(conversation, element) {
     const apiUrl = 'https://api.openai.com/v1/chat/completions'; // OpenAI Chat API
-    const apiKey = 'API KEY'; // Replace with actual API key
+    const apiKey = '*API KEY'; // Replace with actual API key
 
     let requestBody = {
         model: 'gpt-4',
