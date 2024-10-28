@@ -67,11 +67,11 @@ const unsigned char heart_logo [] PROGMEM = {
 };
 /*
 String wifiName = "ASUS";
-String wifiPass = "*";
+String wifiPass = "$";
 String internet = "20.1.1.65:8080";
 */
 String wifiName = "Ritik";
-String wifiPass = "*";
+String wifiPass = "$";
 String internet = "172.20.10.2:8080";
 bool screenOn = false;
 
