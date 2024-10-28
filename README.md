@@ -28,7 +28,7 @@ HeartForce⚡ provides real-time monitoring of heart rate, G-force, and oxygen s
 
 3. **Run the Server**  
    ```bash
-   node server.js
+   node index.js
    ```
 
 4. **Access the Dashboard**  
